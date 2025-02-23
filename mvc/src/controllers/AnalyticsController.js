@@ -1,7 +1,7 @@
 import { handleAsyncErrors } from '../utils/errorHandler.js'
 import LinkModel from '../models/LinkModel.js'
 import AnalyticModel from '../models/AnalyticModel.js'
-import AnalyticsSerializer from '../serializers/AnalyticsSerializer.js'
+import AnalyticSerializer from '../serializers/AnalyticSerializer.js'
 
 class AnalyticsController {
   static index = handleAsyncErrors(async (req, res) => {
@@ -22,7 +22,7 @@ class AnalyticsController {
       offset
     )
 
-    res.json(AnalyticsSerializer.serializeMany(analytics))
+    res.json(AnalyticSerializer.serializeMany(analytics))
   })
 }
 

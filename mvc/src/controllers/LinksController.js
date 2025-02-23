@@ -68,7 +68,6 @@ class LinksController {
 
   static delete = handleAsyncErrors(async (req, res) => {
     const { id } = req.params
-
     const existingLink = await LinkModel.findById(id)
 
     if (!existingLink) {

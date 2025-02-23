@@ -23,7 +23,7 @@ app.get('/api/links', LinksController.index)
 app.post('/api/links', LinksController.create)
 app.get('/api/links/:id', LinksController.show)
 app.get('/:shortCode', LinksController.redirect)
-app.put('/api/links/:id', LinksController.update)
+app.patch('/api/links/:id', LinksController.update)
 app.delete('/api/links/:id', LinksController.delete)
 
 app.get('/api/analytics/:linkId', AnalyticsController.index)

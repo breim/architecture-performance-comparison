@@ -1,4 +1,4 @@
-import AnalyticsSerializer from './AnalyticsSerializer.js'
+import AnalyticSerializer from './AnalyticSerializer.js'
 
 class LinkSerializer {
   static serialize(link) {
@@ -9,7 +9,7 @@ class LinkSerializer {
       shortUrl: `${process.env.BASE_URL}/${link.shortCode}`,
       createdAt: link.createdAt,
       visitsCounter: link.visitsCounter,
-      analytics: AnalyticsSerializer.serializeMany(link.analytics || []),
+      analytics: AnalyticSerializer.serializeMany(link.analytics || []),
     }
   }
 

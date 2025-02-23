@@ -1,4 +1,4 @@
-class AnalyticsSerializer {
+class AnalyticSerializer {
   static serialize(analytic) {
     return {
       id: analytic.id,
@@ -14,4 +14,4 @@ class AnalyticsSerializer {
   }
 }
 
-export default AnalyticsSerializer
+export default AnalyticSerializer
