@@ -52,7 +52,7 @@ describe('AnalyticModel', () => {
       offset
     )
 
-    expect(prisma.analytics.findMany).toHaveBeenCalledTimes(1) // Ensure it's called once
+    expect(prisma.analytics.findMany).toHaveBeenCalledTimes(1)
     expect(prisma.analytics.findMany).toHaveBeenCalledWith({
       where: { linkId },
       orderBy: { visitedAt: 'desc' },

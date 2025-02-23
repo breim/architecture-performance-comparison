@@ -20,7 +20,7 @@ describe('Error Handler Utils', () => {
       await wrappedFn(req, res, next)
 
       expect(mockFn).toHaveBeenCalledWith(req, res, next)
-      expect(next).not.toHaveBeenCalled() // No error should trigger `next`
+      expect(next).not.toHaveBeenCalled()
     })
 
     test('should catch an error and pass it to next', async () => {
@@ -31,7 +31,7 @@ describe('Error Handler Utils', () => {
       await wrappedFn(req, res, next)
 
       expect(mockFn).toHaveBeenCalledWith(req, res, next)
-      expect(next).toHaveBeenCalledWith(error) // Ensures error is passed correctly
+      expect(next).toHaveBeenCalledWith(error)
     })
   })
 

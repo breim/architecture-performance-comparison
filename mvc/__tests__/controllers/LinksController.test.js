@@ -3,7 +3,6 @@ import LinkModel from '../../src/models/LinkModel'
 import LinkSerializer from '../../src/serializers/LinkSerializer'
 import { nanoid } from 'nanoid'
 
-// Create mocks for dependencies
 jest.mock('../../src/models/LinkModel')
 jest.mock('../../src/serializers/LinkSerializer')
 jest.mock('nanoid', () => ({
