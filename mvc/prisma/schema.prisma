@@ -25,7 +25,7 @@ model Analytics {
   ip        String
   userAgent String
   visitedAt DateTime @default(now())
-  link      Link     @relation(fields: [linkId], references: [id])
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@index([linkId])
 }
