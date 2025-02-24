@@ -27,6 +27,46 @@ To run tests in watch mode (tests will re-run when files change):
 npm run test:watch
 ```
 
+## Load Testing
+
+The project includes load tests using k6 to measure performance under heavy load conditions. These tests cover all API endpoints and simulate realistic user scenarios.
+
+### Running Load Tests
+
+1. First, make sure your application is running:
+
+```bash
+cd mvc
+npm run dev
+```
+
+2. In a new terminal, run the load test:
+
+```bash
+k6 run mvc/load-tests/links.js
+```
+
+The load test simulates the following scenario:
+
+- Ramps up to 50 virtual users over 1 minute
+- Maintains 50 virtual users for 3 minutes
+- Ramps down to 0 users over 1 minute
+
+Each virtual user performs the following operations:
+
+- Creates a new link
+- Lists all links
+- Gets a specific link
+- Redirects using the short code
+- Updates the link
+- Gets analytics for the link
+- Deletes the link
+
+Performance thresholds:
+
+- 95% of requests should complete within 2 seconds
+- Less than 1% of requests should fail
+
 ## Code Metrics
 
 The project includes a code metrics tool that analyzes the codebase and provides insights about:
