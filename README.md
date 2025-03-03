@@ -46,6 +46,10 @@ npm run dev
 k6 run mvc/load-tests/links.js
 ```
 
+```bash
+k6 run hexagonal/load-tests/links.js
+```
+
 The load test simulates the following scenario:
 
 - Ramps up to 50 virtual users over 1 minute
@@ -89,16 +93,16 @@ node codeMetrics.js
 
 📂 Analyzing: MVC (./mvc/src)
 📁 Files Analyzed: 8
-📄 Total Lines of Code: 245
-🔹 Functions Count: 12
-🔸 Classes Count: 4
+📄 Total Lines of Code: 300
+🔹 Functions Count: 9
+🔸 Classes Count: 6
 --------------------------------------------
 
-📂 Analyzing: Hexagonal (./hexagonal/src)
-📁 Files Analyzed: 10
-📄 Total Lines of Code: 312
-🔹 Functions Count: 15
-🔸 Classes Count: 6
+📂 Analyzing: Hexagonal (./hexagonal)
+📁 Files Analyzed: 19
+📄 Total Lines of Code: 813
+🔹 Functions Count: 33
+🔸 Classes Count: 17
 --------------------------------------------
 ```
 
