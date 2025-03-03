@@ -3,10 +3,14 @@ import path from "path";
 
 const DIRECTORIES_TO_SCAN = [
   { name: "MVC", path: "./mvc/src" },
-  { name: "Hexagonal", path: "./hexagonal/src" },
+  {
+    name: "Hexagonal",
+    path: "./hexagonal",
+    includeDirs: ["adapters", "application", "config", "domain"],
+  },
 ];
 
-const countMetrics = (directory) => {
+const countMetrics = (directory, includeDirs = null) => {
   let totalLines = 0;
   let totalFunctions = 0;
   let totalClasses = 0;
@@ -25,8 +29,28 @@ const countMetrics = (directory) => {
       const stats = fs.statSync(fullPath);
 
       if (stats.isDirectory()) {
-        traverseDirectory(fullPath);
+        // For Hexagonal architecture, only traverse specified directories
+        if (includeDirs) {
+          const relativePath = path.relative(directory, fullPath);
+          const topLevelDir = relativePath.split(path.sep)[0];
+
+          if (includeDirs.includes(topLevelDir) || relativePath === "") {
+            traverseDirectory(fullPath);
+          }
+        } else {
+          traverseDirectory(fullPath);
+        }
       } else if (file.endsWith(".js")) {
+        // For Hexagonal architecture, only count files in specified directories
+        if (includeDirs) {
+          const relativePath = path.relative(directory, path.dirname(fullPath));
+          const topLevelDir = relativePath.split(path.sep)[0];
+
+          if (!includeDirs.includes(topLevelDir) && relativePath !== "") {
+            return;
+          }
+        }
+
         totalFiles++;
         const content = fs.readFileSync(fullPath, "utf8");
 
@@ -51,9 +75,9 @@ const countMetrics = (directory) => {
 
 console.log("\n================ CODE METRICS =================");
 
-DIRECTORIES_TO_SCAN.forEach(({ name, path }) => {
+DIRECTORIES_TO_SCAN.forEach(({ name, path, includeDirs }) => {
   console.log(`\n📂 Analyzing: ${name} (${path})`);
-  const results = countMetrics(path);
+  const results = countMetrics(path, includeDirs);
 
   console.log(`📁 Files Analyzed: ${results.totalFiles}`);
   console.log(`📄 Total Lines of Code: ${results.totalLines}`);
