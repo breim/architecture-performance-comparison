@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "URL shortener service using Hexagonal Architecture",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
