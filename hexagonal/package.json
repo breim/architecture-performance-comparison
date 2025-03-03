@@ -2,14 +2,16 @@
   "name": "hexagonal-shortlink",
   "version": "1.0.0",
   "description": "URL shortener service using Hexagonal Architecture",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
     "test": "jest",
-    "format": "prettier --write ."
+    "test:watch": "jest --watch"
   },
+  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "cors": "^2.8.5",

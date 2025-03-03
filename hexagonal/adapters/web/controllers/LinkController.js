@@ -26,14 +26,18 @@ class LinkController {
     try {
       const links = await this.getAllLinksUseCase.execute()
 
-      const formattedLinks = links.map(link => ({
-        ...link.toJSON(),
-        shortUrl: `${req.protocol}://${req.get('host')}/${link.shortCode}`,
-      }))
+      const formattedLinks = links.map(link => {
+        const linkJson = link.toJSON()
+
+        if (req.get && req.protocol) {
+          linkJson.shortUrl = `${req.protocol}://${req.get('host')}/${link.shortCode}`
+        }
+
+        return linkJson
+      })
 
       return res.status(200).json(formattedLinks)
     } catch (error) {
-      console.error('Error getting all links:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -48,20 +52,24 @@ class LinkController {
 
       const link = await this.createLinkUseCase.execute(originalUrl)
 
-      return res.status(201).json({
+      const response = {
         id: link.id,
         originalUrl: link.originalUrl,
         shortCode: link.shortCode,
-        shortUrl: `${req.protocol}://${req.get('host')}/${link.shortCode}`,
         visitsCounter: link.visitsCounter,
         createdAt: link.createdAt,
-      })
+      }
+
+      if (req.get && req.protocol) {
+        response.shortUrl = `${req.protocol}://${req.get('host')}/${link.shortCode}`
+      }
+
+      return res.status(201).json(response)
     } catch (error) {
       if (error instanceof InvalidUrlError) {
         return res.status(400).json({ error: error.message })
       }
 
-      console.error('Error creating link:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -72,16 +80,18 @@ class LinkController {
 
       const link = await this.getLinkByIdUseCase.execute(id)
 
-      return res.status(200).json({
-        ...link.toJSON(),
-        shortUrl: `${req.protocol}://${req.get('host')}/${link.shortCode}`,
-      })
+      const response = link.toJSON()
+
+      if (req.get && req.protocol) {
+        response.shortUrl = `${req.protocol}://${req.get('host')}/${link.shortCode}`
+      }
+
+      return res.status(200).json(response)
     } catch (error) {
       if (error instanceof LinkNotFoundError) {
         return res.status(404).json({ error: 'Link not found' })
       }
 
-      console.error('Error getting link:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -110,7 +120,6 @@ class LinkController {
         return res.status(400).json({ error: error.message })
       }
 
-      console.error('Error updating link:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -127,7 +136,6 @@ class LinkController {
         return res.status(404).json({ error: 'Link not found' })
       }
 
-      console.error('Error deleting link:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -152,7 +160,6 @@ class LinkController {
         return res.status(404).json({ error: 'Link not found' })
       }
 
-      console.error('Error redirecting link:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
@@ -174,7 +181,6 @@ class LinkController {
         return res.status(404).json({ error: 'Link not found' })
       }
 
-      console.error('Error getting link analytics:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }

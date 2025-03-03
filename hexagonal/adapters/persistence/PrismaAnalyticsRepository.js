@@ -57,7 +57,6 @@ class PrismaAnalyticsRepository extends AnalyticsRepository {
       _count: true,
     })
 
-    // Obter as datas únicas de visitas
     const visitDates = await this.prisma.analytics.findMany({
       where: { linkId },
       select: {
@@ -65,14 +64,12 @@ class PrismaAnalyticsRepository extends AnalyticsRepository {
       },
     })
 
-    // Processar as datas para agrupar por dia
     const dateMap = new Map()
     visitDates.forEach(visit => {
       const dateStr = visit.visitedAt.toISOString().split('T')[0]
       dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + 1)
     })
 
-    // Converter para o formato esperado e ordenar por data (decrescente)
     const visitsByDate = Array.from(dateMap.entries())
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => new Date(b.date) - new Date(a.date))

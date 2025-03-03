@@ -4,9 +4,14 @@ import { InvalidUrlError } from '../exceptions/LinkExceptions.js'
 
 class LinkService {
   validateUrl(url) {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return false
+    }
+
     try {
-      new URL(url)
-      return true
+      const parsedUrl = new URL(url)
+
+      return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:'
     } catch (error) {
       return false
     }
