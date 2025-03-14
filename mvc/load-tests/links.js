@@ -4,9 +4,9 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export const options = {
   stages: [
-    { duration: '1m', target: 10 }, // Ramp up to 50 users
-    { duration: '5m', target: 50 }, // Stay at 50 users
-    { duration: '1m', target: 0 }, // Ramp down to 0 users
+    { duration: '30s', target: 100 }, // Ramp up to 50 users
+    { duration: '1m', target: 200 }, // Stay at 50 users
+    { duration: '1m', target: 50 }, // Ramp down to 0 users
   ],
   thresholds: {
     http_req_duration: ['p(95)<2000'], // 95% of requests should be below 2s
@@ -22,7 +22,6 @@ export default function () {
   // Create a new link
   const createPayload = {
     url: `https://example.com/`,
-    title: `Test Link ${randomString(5)}`,
   }
 
   const createResponse = http.post(
@@ -116,7 +115,6 @@ export default function () {
   // Delete link (now safe to delete since analytics are cleaned up)
   if (createdLinkId) {
     const deleteResponse = http.del(`${BASE_URL}/api/links/${createdLinkId}`)
-    console.log(deleteResponse)
     check(deleteResponse, {
       'delete link status is 204': r => r.status === 204,
     })

@@ -4,9 +4,9 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export const options = {
   stages: [
-    { duration: '30s', target: 10 }, // Ramp up to 50 users
-    { duration: '1m', target: 20 }, // Stay at 50 users
-    { duration: '1m', target: 0 }, // Ramp down to 0 users
+    { duration: '30s', target: 100 }, // Ramp up to 50 users
+    { duration: '1m', target: 200 }, // Stay at 50 users
+    { duration: '1m', target: 50 }, // Ramp down to 0 users
   ],
   thresholds: {
     http_req_duration: ['p(95)<2000'], // 95% of requests should be below 2s
