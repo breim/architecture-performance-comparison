@@ -95,6 +95,7 @@ class PrismaLinkRepository extends LinkRepository {
 
   async findAll() {
     const links = await this.prisma.link.findMany({
+      take: 15,
       orderBy: { createdAt: 'desc' },
     })
 

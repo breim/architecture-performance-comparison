@@ -5,15 +5,8 @@ const prisma = new PrismaClient()
 class LinkModel {
   static async findAll() {
     return prisma.link.findMany({
-      select: {
-        id: true,
-        originalUrl: true,
-        shortCode: true,
-        createdAt: true,
-        _count: {
-          select: { analytics: true },
-        },
-      },
+      take: 15,
+      orderBy: { createdAt: 'desc' },
     })
   }
 
