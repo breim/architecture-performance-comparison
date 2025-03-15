@@ -17,24 +17,26 @@ import DeleteLinkUseCase from './application/use_cases/DeleteLinkUseCase.js'
 
 // Adapters
 import PrismaLinkRepository from './adapters/persistence/PrismaLinkRepository.js'
-import PrismaAnalyticsRepository from './adapters/persistence/PrismaAnalyticsRepository.js'
 import LinkController from './adapters/web/controllers/LinkController.js'
 import setupLinkRoutes from './adapters/web/routes/linkRoutes.js'
 import setupRedirectRoutes from './adapters/web/routes/redirectRoutes.js'
+import AnalyticsServiceAdapter from './adapters/external_services/AnalyticsServiceAdapter.js'
 
 const linkRepository = new PrismaLinkRepository()
-const analyticsRepository = new PrismaAnalyticsRepository()
+const analyticsServiceUrl =
+  process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3001'
+const analyticsServiceAdapter = new AnalyticsServiceAdapter(analyticsServiceUrl)
 
 const linkService = new LinkService()
 
 const createLinkUseCase = new CreateLinkUseCase(linkService, linkRepository)
 const redirectLinkUseCase = new RedirectLinkUseCase(
   linkRepository,
-  analyticsRepository
+  analyticsServiceAdapter
 )
 const getLinkAnalyticsUseCase = new GetLinkAnalyticsUseCase(
   linkRepository,
-  analyticsRepository
+  analyticsServiceAdapter
 )
 const getAllLinksUseCase = new GetAllLinksUseCase(linkRepository)
 const getLinkByIdUseCase = new GetLinkByIdUseCase(linkRepository)

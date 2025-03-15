@@ -1,9 +1,9 @@
 import { LinkNotFoundError } from '../../domain/exceptions/LinkExceptions.js'
 
 class GetLinkAnalyticsUseCase {
-  constructor(linkRepository, analyticsRepository) {
+  constructor(linkRepository, analyticsServicePort) {
     this.linkRepository = linkRepository
-    this.analyticsRepository = analyticsRepository
+    this.analyticsServicePort = analyticsServicePort
   }
 
   async execute(id, page = 1, limit = 10) {
@@ -13,20 +13,33 @@ class GetLinkAnalyticsUseCase {
       throw new LinkNotFoundError(`Link with id ${id} not found`)
     }
 
-    const offset = (page - 1) * limit
-    const analytics = await this.analyticsRepository.findByLinkId(
-      link.id,
-      limit,
-      offset
-    )
-    const summary = await this.analyticsRepository.getSummaryForLink(link.id)
+    let analyticsData = null
+    if (this.analyticsServicePort) {
+      try {
+        analyticsData = await this.analyticsServicePort.getAnalytics(
+          link.id,
+          page,
+          limit
+        )
+      } catch (error) {
+        console.error('Error getting analytics from analytics service:', error)
+      }
+    }
+
+    if (analyticsData) {
+      return analyticsData
+    }
 
     return {
       link: link.toJSON(),
       analytics: {
         visits: link.visitsCounter,
-        details: analytics.map(a => a.toJSON()),
-        summary,
+        details: [],
+        summary: {
+          totalVisits: link.visitsCounter,
+          uniqueVisitors: 0,
+          visitsByDate: [],
+        },
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),

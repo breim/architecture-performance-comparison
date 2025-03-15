@@ -1,10 +1,9 @@
 import { LinkNotFoundError } from '../../domain/exceptions/LinkExceptions.js'
-import Analytics from '../../domain/models/Analytics.js'
 
 class RedirectLinkUseCase {
-  constructor(linkRepository, analyticsRepository) {
+  constructor(linkRepository, analyticsServicePort) {
     this.linkRepository = linkRepository
-    this.analyticsRepository = analyticsRepository
+    this.analyticsServicePort = analyticsServicePort
   }
 
   async execute(shortCode, ip, userAgent) {
@@ -17,8 +16,13 @@ class RedirectLinkUseCase {
     link.incrementVisits()
     await this.linkRepository.update(link)
 
-    const analytics = new Analytics(null, link.id, ip, userAgent)
-    await this.analyticsRepository.create(analytics)
+    if (this.analyticsServicePort) {
+      try {
+        await this.analyticsServicePort.trackVisit(link.id, ip, userAgent)
+      } catch (error) {
+        console.error('Error tracking visit in analytics service:', error)
+      }
+    }
 
     return link.originalUrl
   }
