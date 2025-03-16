@@ -21,11 +21,15 @@ import LinkController from './adapters/web/controllers/LinkController.js'
 import setupLinkRoutes from './adapters/web/routes/linkRoutes.js'
 import setupRedirectRoutes from './adapters/web/routes/redirectRoutes.js'
 import AnalyticsServiceAdapter from './adapters/external_services/AnalyticsServiceAdapter.js'
+import PrometheusMetricsAdapter from './adapters/metrics/PrometheusMetricsAdapter.js'
+import createMetricsMiddleware from './adapters/middleware/metricsMiddleware.js'
 
+// Inicialização dos adaptadores
 const linkRepository = new PrismaLinkRepository()
 const analyticsServiceUrl =
   process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3001'
 const analyticsServiceAdapter = new AnalyticsServiceAdapter(analyticsServiceUrl)
+const metricsAdapter = new PrometheusMetricsAdapter()
 
 const linkService = new LinkService()
 
@@ -62,6 +66,19 @@ app.use(useragent.express())
 app.use((req, res, next) => {
   req.clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress
   next()
+})
+
+// Adiciona o middleware de métricas
+app.use(createMetricsMiddleware(metricsAdapter))
+
+// Endpoint de métricas do Prometheus
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', metricsAdapter.getContentType())
+    res.end(await metricsAdapter.getMetrics())
+  } catch (err) {
+    res.status(500).end(err)
+  }
 })
 
 app.use('/api', setupLinkRoutes(linkController))
