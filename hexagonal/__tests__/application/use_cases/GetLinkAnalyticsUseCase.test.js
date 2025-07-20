@@ -43,25 +43,48 @@ describe('GetLinkAnalyticsUseCase', () => {
     findById: jest.fn().mockResolvedValue(mockLink),
   }
 
-  const mockAnalyticsRepository = {
-    findByLinkId: jest.fn().mockResolvedValue(mockAnalytics),
-    getSummaryForLink: jest.fn().mockResolvedValue(mockSummary),
+  const mockAnalyticsService = {
+    getAnalytics: jest.fn().mockImplementation((id, page, limit) => ({
+      link: mockLink.toJSON(),
+      analytics: {
+        visits: mockLink.visitsCounter,
+        details: mockAnalytics.map(a => a.toJSON()),
+        summary: mockSummary,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: mockLink.visitsCounter,
+          totalPages: Math.ceil(mockLink.visitsCounter / limit),
+        },
+      },
+    })),
   }
 
   let getLinkAnalyticsUseCase
 
   beforeEach(() => {
     mockLinkRepository.findById.mockClear()
-    mockAnalyticsRepository.findByLinkId.mockClear()
-    mockAnalyticsRepository.getSummaryForLink.mockClear()
+    mockAnalyticsService.getAnalytics.mockClear()
 
     mockLinkRepository.findById.mockResolvedValue(mockLink)
-    mockAnalyticsRepository.findByLinkId.mockResolvedValue(mockAnalytics)
-    mockAnalyticsRepository.getSummaryForLink.mockResolvedValue(mockSummary)
+    mockAnalyticsService.getAnalytics.mockImplementation((id, page, limit) => ({
+      link: mockLink.toJSON(),
+      analytics: {
+        visits: mockLink.visitsCounter,
+        details: mockAnalytics.map(a => a.toJSON()),
+        summary: mockSummary,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: mockLink.visitsCounter,
+          totalPages: Math.ceil(mockLink.visitsCounter / limit),
+        },
+      },
+    }))
 
     getLinkAnalyticsUseCase = new GetLinkAnalyticsUseCase(
       mockLinkRepository,
-      mockAnalyticsRepository
+      mockAnalyticsService
     )
   })
 
@@ -73,16 +96,10 @@ describe('GetLinkAnalyticsUseCase', () => {
     const result = await getLinkAnalyticsUseCase.execute(id, page, limit)
 
     expect(mockLinkRepository.findById).toHaveBeenCalledWith(id)
-
-    const offset = (page - 1) * limit
-    expect(mockAnalyticsRepository.findByLinkId).toHaveBeenCalledWith(
+    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith(
       mockLink.id,
-      limit,
-      offset
-    )
-
-    expect(mockAnalyticsRepository.getSummaryForLink).toHaveBeenCalledWith(
-      mockLink.id
+      page,
+      limit
     )
 
     expect(result).toEqual({
@@ -110,8 +127,7 @@ describe('GetLinkAnalyticsUseCase', () => {
       LinkNotFoundError
     )
     expect(mockLinkRepository.findById).toHaveBeenCalledWith(id)
-    expect(mockAnalyticsRepository.findByLinkId).not.toHaveBeenCalled()
-    expect(mockAnalyticsRepository.getSummaryForLink).not.toHaveBeenCalled()
+    expect(mockAnalyticsService.getAnalytics).not.toHaveBeenCalled()
   })
 
   test('should handle pagination correctly', async () => {
@@ -121,11 +137,10 @@ describe('GetLinkAnalyticsUseCase', () => {
 
     const result = await getLinkAnalyticsUseCase.execute(id, page, limit)
 
-    const offset = (page - 1) * limit
-    expect(mockAnalyticsRepository.findByLinkId).toHaveBeenCalledWith(
+    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith(
       mockLink.id,
-      limit,
-      offset
+      page,
+      limit
     )
 
     expect(result.analytics.pagination).toEqual({
@@ -138,12 +153,12 @@ describe('GetLinkAnalyticsUseCase', () => {
 
   test('should propagate errors from repositories', async () => {
     const error = new Error('Database error')
-    mockAnalyticsRepository.findByLinkId.mockRejectedValueOnce(error)
+    mockAnalyticsService.getAnalytics.mockRejectedValueOnce(error)
 
     const id = 'test-id'
 
     await expect(getLinkAnalyticsUseCase.execute(id)).rejects.toThrow(error)
     expect(mockLinkRepository.findById).toHaveBeenCalledWith(id)
-    expect(mockAnalyticsRepository.findByLinkId).toHaveBeenCalled()
+    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalled()
   })
 })

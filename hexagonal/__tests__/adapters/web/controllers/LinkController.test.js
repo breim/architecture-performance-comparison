@@ -159,6 +159,20 @@ describe('LinkController', () => {
       expect(res.status).toHaveBeenCalledWith(500)
       expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' })
     })
+
+    test('should return links without shortUrl when req.get and req.protocol are not available', async () => {
+      const reqWithoutProtocol = mockRequest()
+      delete reqWithoutProtocol.get
+      delete reqWithoutProtocol.protocol
+
+      await linkController.index(reqWithoutProtocol, res)
+
+      expect(mockGetAllLinksUseCase.execute).toHaveBeenCalled()
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(
+        mockLinks.map(link => link.toJSON())
+      )
+    })
   })
 
   describe('create', () => {
@@ -218,6 +232,27 @@ describe('LinkController', () => {
       expect(res.status).toHaveBeenCalledWith(500)
       expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' })
     })
+
+    test('should create a link without shortUrl when req.get and req.protocol are not available', async () => {
+      const reqWithoutProtocol = mockRequest()
+      delete reqWithoutProtocol.get
+      delete reqWithoutProtocol.protocol
+      reqWithoutProtocol.body.originalUrl = 'https://example.com'
+
+      await linkController.create(reqWithoutProtocol, res)
+
+      expect(mockCreateLinkUseCase.execute).toHaveBeenCalledWith(
+        'https://example.com'
+      )
+      expect(res.status).toHaveBeenCalledWith(201)
+      expect(res.json).toHaveBeenCalledWith({
+        id: mockLink.id,
+        originalUrl: mockLink.originalUrl,
+        shortCode: mockLink.shortCode,
+        visitsCounter: mockLink.visitsCounter,
+        createdAt: mockLink.createdAt,
+      })
+    })
   })
 
   describe('show', () => {
@@ -260,6 +295,19 @@ describe('LinkController', () => {
       expect(mockGetLinkByIdUseCase.execute).toHaveBeenCalledWith('test-id')
       expect(res.status).toHaveBeenCalledWith(500)
       expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' })
+    })
+
+    test('should return a link without shortUrl when req.get and req.protocol are not available', async () => {
+      const reqWithoutProtocol = mockRequest()
+      delete reqWithoutProtocol.get
+      delete reqWithoutProtocol.protocol
+      reqWithoutProtocol.params.id = 'test-id'
+
+      await linkController.show(reqWithoutProtocol, res)
+
+      expect(mockGetLinkByIdUseCase.execute).toHaveBeenCalledWith('test-id')
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(mockLink.toJSON())
     })
   })
 

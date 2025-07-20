@@ -26,7 +26,6 @@ class AnalyticsServiceAdapter extends AnalyticsServicePort {
 
       return await response.json()
     } catch (error) {
-      console.error('Error tracking visit in analytics service:', error)
       return null
     }
   }
@@ -46,7 +45,6 @@ class AnalyticsServiceAdapter extends AnalyticsServicePort {
 
       return await response.json()
     } catch (error) {
-      console.error('Error getting analytics from analytics service:', error)
       throw error
     }
   }

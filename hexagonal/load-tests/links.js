@@ -4,9 +4,15 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export const options = {
   stages: [
-    { duration: '30s', target: 100 }, // Ramp up to 50 users
-    { duration: '1m', target: 200 }, // Stay at 50 users
-    { duration: '1m', target: 50 }, // Ramp down to 0 users
+    { duration: '1m', target: 50 },
+    { duration: '1m', target: 100 },
+    { duration: '2m', target: 200 },
+    { duration: '4m', target: 300 },
+    { duration: '5m', target: 400 },
+    { duration: '3m', target: 300 },
+    { duration: '2m', target: 200 },
+    { duration: '1m', target: 100 },
+    { duration: '1m', target: 50 },
   ],
   thresholds: {
     http_req_duration: ['p(95)<2000'], // 95% of requests should be below 2s
@@ -14,7 +20,7 @@ export const options = {
   },
 }
 
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = 'http://159.89.24.60:3000'
 let createdLinkId = ''
 let shortCode = ''
 

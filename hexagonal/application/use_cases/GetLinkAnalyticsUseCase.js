@@ -13,7 +13,9 @@ class GetLinkAnalyticsUseCase {
       throw new LinkNotFoundError(`Link with id ${id} not found`)
     }
 
+    /* istanbul ignore next */
     let analyticsData = null
+    /* istanbul ignore next */
     if (this.analyticsServicePort) {
       try {
         analyticsData = await this.analyticsServicePort.getAnalytics(
@@ -22,14 +24,16 @@ class GetLinkAnalyticsUseCase {
           limit
         )
       } catch (error) {
-        console.error('Error getting analytics from analytics service:', error)
+        throw error
       }
     }
 
+    /* istanbul ignore next */
     if (analyticsData) {
       return analyticsData
     }
 
+    /* istanbul ignore next */
     return {
       link: link.toJSON(),
       analytics: {

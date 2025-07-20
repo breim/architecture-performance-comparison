@@ -20,7 +20,7 @@ class RedirectLinkUseCase {
       try {
         await this.analyticsServicePort.trackVisit(link.id, ip, userAgent)
       } catch (error) {
-        console.error('Error tracking visit in analytics service:', error)
+        throw error
       }
     }
 

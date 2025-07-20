@@ -26,8 +26,8 @@ describe('RedirectLinkUseCase', () => {
     update: jest.fn().mockResolvedValue(mockLink),
   }
 
-  const mockAnalyticsRepository = {
-    create: jest.fn().mockResolvedValue(mockAnalytics),
+  const mockAnalyticsService = {
+    trackVisit: jest.fn().mockResolvedValue(mockAnalytics),
   }
 
   let redirectLinkUseCase
@@ -35,13 +35,13 @@ describe('RedirectLinkUseCase', () => {
   beforeEach(() => {
     mockLinkRepository.findByShortCode.mockClear()
     mockLinkRepository.update.mockClear()
-    mockAnalyticsRepository.create.mockClear()
+    mockAnalyticsService.trackVisit.mockClear()
 
     mockLinkRepository.findByShortCode.mockResolvedValue(mockLink)
 
     redirectLinkUseCase = new RedirectLinkUseCase(
       mockLinkRepository,
-      mockAnalyticsRepository
+      mockAnalyticsService
     )
   })
 
@@ -68,12 +68,10 @@ describe('RedirectLinkUseCase', () => {
     const updatedLink = mockLinkRepository.update.mock.calls[0][0]
     expect(updatedLink.visitsCounter).toBe(6)
 
-    expect(mockAnalyticsRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        linkId: mockLink.id,
-        ip,
-        userAgent,
-      })
+    expect(mockAnalyticsService.trackVisit).toHaveBeenCalledWith(
+      mockLink.id,
+      ip,
+      userAgent
     )
 
     expect(result).toBe(mockLink.originalUrl)
@@ -92,7 +90,7 @@ describe('RedirectLinkUseCase', () => {
 
     expect(mockLinkRepository.findByShortCode).toHaveBeenCalledWith(shortCode)
     expect(mockLinkRepository.update).not.toHaveBeenCalled()
-    expect(mockAnalyticsRepository.create).not.toHaveBeenCalled()
+    expect(mockAnalyticsService.trackVisit).not.toHaveBeenCalled()
   })
 
   test('should propagate errors from linkRepository.update', async () => {
@@ -109,12 +107,12 @@ describe('RedirectLinkUseCase', () => {
 
     expect(mockLinkRepository.findByShortCode).toHaveBeenCalledWith(shortCode)
     expect(mockLinkRepository.update).toHaveBeenCalled()
-    expect(mockAnalyticsRepository.create).not.toHaveBeenCalled()
+    expect(mockAnalyticsService.trackVisit).not.toHaveBeenCalled()
   })
 
-  test('should propagate errors from analyticsRepository.create', async () => {
-    const error = new Error('Analytics database error')
-    mockAnalyticsRepository.create.mockRejectedValueOnce(error)
+  test('should propagate errors from analytics service', async () => {
+    const error = new Error('Analytics service error')
+    mockAnalyticsService.trackVisit.mockRejectedValueOnce(error)
 
     const shortCode = 'abc123'
     const ip = '127.0.0.1'
@@ -126,6 +124,29 @@ describe('RedirectLinkUseCase', () => {
 
     expect(mockLinkRepository.findByShortCode).toHaveBeenCalledWith(shortCode)
     expect(mockLinkRepository.update).toHaveBeenCalled()
-    expect(mockAnalyticsRepository.create).toHaveBeenCalled()
+    expect(mockAnalyticsService.trackVisit).toHaveBeenCalled()
+  })
+
+  test('should handle redirect without analytics service', async () => {
+    const shortCode = 'abc123'
+    const ip = '127.0.0.1'
+    const userAgent = 'Mozilla/5.0'
+
+    // Create a new instance without analytics service
+    const redirectLinkUseCaseWithoutAnalytics = new RedirectLinkUseCase(
+      mockLinkRepository,
+      null
+    )
+
+    const result = await redirectLinkUseCaseWithoutAnalytics.execute(
+      shortCode,
+      ip,
+      userAgent
+    )
+
+    expect(mockLinkRepository.findByShortCode).toHaveBeenCalledWith(shortCode)
+    expect(mockLinkRepository.update).toHaveBeenCalled()
+    expect(mockAnalyticsService.trackVisit).not.toHaveBeenCalled()
+    expect(result).toBe(mockLink.originalUrl)
   })
 })

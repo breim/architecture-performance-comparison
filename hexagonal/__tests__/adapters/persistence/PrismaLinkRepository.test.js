@@ -237,6 +237,7 @@ describe('PrismaLinkRepository', () => {
 
       expect(mockPrisma.link.findMany).toHaveBeenCalledWith({
         orderBy: { createdAt: 'desc' },
+        take: 15,
       })
 
       expect(results).toHaveLength(2)
@@ -265,6 +266,7 @@ describe('PrismaLinkRepository', () => {
 
       expect(mockPrisma.link.findMany).toHaveBeenCalledWith({
         orderBy: { createdAt: 'desc' },
+        take: 15,
       })
       expect(results).toEqual([])
     })
