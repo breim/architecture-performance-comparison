@@ -1,109 +1,81 @@
-# Architecture Performance Comparison
+# Arquitetura Hexagonal - Comparação de Performance
 
-This project compares different architectural approaches (MVC and Hexagonal) for building applications.
+Este repositório contém dois projetos que demonstram a implementação da arquitetura hexagonal (Ports and Adapters) em JavaScript:
 
-## Running Tests
+1. **Serviço de Links Encurtados (hexagonal)**: Um serviço para encurtar URLs e redirecionar usuários.
+2. **Serviço de Analytics (analytics)**: Um serviço dedicado para rastrear e analisar visitas aos links encurtados.
 
-Before running the tests, make sure to install all dependencies:
+## Arquitetura
 
-```bash
-cd mvc
-npm install
+Os dois serviços seguem a arquitetura hexagonal, que separa o domínio da aplicação das suas dependências externas:
+
+- **Domain**: Contém as entidades, regras de negócio e interfaces de repositórios
+- **Application**: Contém os casos de uso e DTOs
+- **Adapters**: Contém as implementações concretas para interfaces externas (web, banco de dados, serviços externos)
+
+### Comunicação entre Serviços
+
+Os serviços se comunicam através de interfaces bem definidas (ports) e adaptadores:
+
+- O serviço de Links usa um `AnalyticsServiceAdapter` para enviar dados de visitas ao serviço de Analytics
+- O serviço de Analytics usa um `LinkServiceAdapter` para verificar a existência de links no serviço de Links
+
+Esta abordagem permite que cada serviço evolua independentemente, desde que mantenha a compatibilidade com as interfaces definidas.
+
+## Pré-requisitos
+
+- Node.js 18+
+- PostgreSQL
+
+## Configuração
+
+### Serviço de Links
+
+1. Entre na pasta `hexagonal`
+2. Instale as dependências: `npm install`
+3. Configure as variáveis de ambiente copiando `.env.example` para `.env` e ajustando conforme necessário
+4. Gere os arquivos do Prisma: `npm run prisma:generate`
+5. Execute as migrações: `npm run prisma:migrate`
+
+### Serviço de Analytics
+
+1. Entre na pasta `analytics`
+2. Instale as dependências: `npm install`
+3. Configure as variáveis de ambiente copiando `.env.example` para `.env` e ajustando conforme necessário
+4. Gere os arquivos do Prisma: `npm run prisma:generate`
+5. Execute as migrações: `npm run prisma:migrate`
+
+## Executando os Serviços
+
+### Serviço de Links
+
 ```
-
-### Single Test Run
-
-To run all tests once:
-
-```bash
-npm test
-```
-
-### Watch Mode
-
-To run tests in watch mode (tests will re-run when files change):
-
-```bash
-npm run test:watch
-```
-
-## Load Testing
-
-The project includes load tests using k6 to measure performance under heavy load conditions. These tests cover all API endpoints and simulate realistic user scenarios.
-
-### Running Load Tests
-
-1. First, make sure your application is running:
-
-```bash
-cd mvc
+cd hexagonal
 npm run dev
 ```
 
-2. In a new terminal, run the load test:
+O serviço estará disponível em http://localhost:3000
 
-```bash
-k6 run mvc/load-tests/links.js
-```
-
-```bash
-k6 run hexagonal/load-tests/links.js
-```
-
-The load test simulates the following scenario:
-
-- Ramps up to 50 virtual users over 1 minute
-- Maintains 50 virtual users for 3 minutes
-- Ramps down to 0 users over 1 minute
-
-Each virtual user performs the following operations:
-
-- Creates a new link
-- Lists all links
-- Gets a specific link
-- Redirects using the short code
-- Updates the link
-- Gets analytics for the link
-- Deletes the link
-
-Performance thresholds:
-
-- 95% of requests should complete within 2 seconds
-- Less than 1% of requests should fail
-
-## Code Metrics
-
-The project includes a code metrics tool that analyzes the codebase and provides insights about:
-
-- Total number of files
-- Total lines of code
-- Number of functions
-- Number of classes
-
-To run the code metrics analysis:
-
-```bash
-node codeMetrics.js
-```
-
-### Example Output
+### Serviço de Analytics
 
 ```
-================ CODE METRICS =================
-
-📂 Analyzing: MVC (./mvc/src)
-📁 Files Analyzed: 8
-📄 Total Lines of Code: 300
-🔹 Functions Count: 9
-🔸 Classes Count: 6
---------------------------------------------
-
-📂 Analyzing: Hexagonal (./hexagonal)
-📁 Files Analyzed: 19
-📄 Total Lines of Code: 813
-🔹 Functions Count: 33
-🔸 Classes Count: 17
---------------------------------------------
+cd analytics
+npm run dev
 ```
 
-Note: The numbers shown above are example values. Actual metrics will vary based on the current state of the codebase.
+O serviço estará disponível em http://localhost:3001
+
+## Fluxo de Dados
+
+1. Um usuário acessa um link encurtado (ex: http://localhost:3000/abc123)
+2. O serviço de Links redireciona o usuário para a URL original
+3. O serviço de Links envia dados da visita para o serviço de Analytics
+4. O serviço de Analytics processa e armazena os dados
+5. Quando alguém consulta as estatísticas de um link, o serviço de Links solicita os dados ao serviço de Analytics
+
+## Benefícios desta Arquitetura
+
+1. **Separação de Responsabilidades**: Cada serviço tem uma responsabilidade clara
+2. **Escalabilidade**: Os serviços podem ser escalados independentemente
+3. **Manutenção**: Mudanças em um serviço não afetam o outro, desde que as interfaces sejam mantidas
+4. **Testabilidade**: Cada componente pode ser testado isoladamente
